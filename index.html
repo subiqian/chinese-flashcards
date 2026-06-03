@@ -992,13 +992,10 @@
       currentIdx = idx;
       isFlipped = false;
       const w = deck[idx];
+
+      // Update the front face immediately (safe — it's about to become visible)
       hanziEl.textContent = w.hanzi;
-      hanziBack.textContent = w.hanzi;
-      pinyinEl.textContent = w.pinyin;
-      meaningEl.textContent = w.meaning;
-      rankBadge.textContent = `#${idx + 1} of 100`;
       cardFront.classList.toggle('is-learned', learned.has(idx));
-      renderExamples(w);
 
       card.classList.remove('flipped');
       revealWrap.classList.remove('visible');
@@ -1009,6 +1006,16 @@
       scene.style.display = '';
       completion.classList.remove('show');
       updateProgress();
+
+      // Update back-face content only after the flip animation finishes,
+      // so the new answer is never visible while the card is rotating.
+      setTimeout(() => {
+        hanziBack.textContent = w.hanzi;
+        pinyinEl.textContent = w.pinyin;
+        meaningEl.textContent = w.meaning;
+        rankBadge.textContent = `#${idx + 1} of 100`;
+        renderExamples(w);
+      }, 560);
     }
 
     function flipCard() {
