@@ -957,6 +957,14 @@
       speechSynthesis.speak(u);
     }
 
+    function speakCurrent() {
+      const w = deck[currentIdx];
+      // For characters with multiple readings, speak the first example phrase so
+      // the TTS engine has enough context to pick the primary pronunciation.
+      const text = w.pinyin.includes('/') ? w.examples[0].phrase : w.hanzi;
+      speak(text);
+    }
+
     function updateProgress() {
       const n = learned.size;
       const rem = 100 - n;
@@ -1026,7 +1034,7 @@
       revealWrap.setAttribute('aria-hidden', 'false');
       exPanel.classList.add('visible');
       exPanel.setAttribute('aria-hidden', 'false');
-      setTimeout(() => speak(deck[currentIdx].hanzi), 300);
+      setTimeout(() => speakCurrent(), 300);
     }
 
     function advance() {
@@ -1073,7 +1081,7 @@
 
     speakBtn.addEventListener('click', e => {
       e.stopPropagation();
-      speak(deck[currentIdx].hanzi);
+      speakCurrent();
     });
 
     document.getElementById('learnedBtn').addEventListener('click', markLearned);
