@@ -393,6 +393,21 @@
 
     .btn-reset:hover { color: var(--ink); }
 
+    .btn-anki {
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #1d4ed8;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 0.3rem 0.7rem;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn-anki:hover { background: #dbeafe; }
+
     .btn-restart {
       font-family: inherit;
       font-size: 0.95rem;
@@ -566,6 +581,7 @@
 
   <div class="bottom-bar">
     <button class="btn-reset" id="resetBtn" type="button">Reset all progress</button>
+    <a class="btn-anki" href="chinese-flashcards.apkg" download>⬇︎ Anki deck</a>
   </div>
 
   <p class="shortcuts">
