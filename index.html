@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top 100 Chinese Words — Flashcards</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4efe6;
+      --ink: #1c1917;
+      --muted: #78716c;
+      --accent: #b91c1c;
+      --accent-soft: #fecaca;
+      --green: #15803d;
+      --green-soft: #dcfce7;
+      --card: #fffdf9;
+      --shadow: 0 12px 40px rgba(28, 25, 23, 0.12);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(185, 28, 28, 0.08), transparent),
+        radial-gradient(circle at 100% 100%, rgba(120, 113, 108, 0.06), transparent);
+      color: var(--ink);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      text-align: center;
+      max-width: 32rem;
+      margin-bottom: 1.25rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── progress ── */
+    .progress-wrap {
+      width: min(420px, 100%);
+      margin-bottom: 1.25rem;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .progress-meta strong { color: var(--green); }
+
+    .progress-bar {
+      height: 6px;
+      background: rgba(28, 25, 23, 0.08);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 99px;
+      transition: width 0.45s ease;
+    }
+
+    /* ── card ── */
+    .scene {
+      perspective: 1200px;
+      width: min(420px, 100%);
+      margin-bottom: 0.85rem;
+    }
+
+    .card {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+    }
+
+    .card.flipped { transform: rotateY(180deg); }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(28, 25, 23, 0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 2rem;
+      text-align: center;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+      background: linear-gradient(165deg, #fffdf9 0%, #fef3f2 100%);
+    }
+
+    .card-label {
+      position: absolute;
+      top: 1rem;
+      left: 1.25rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .learned-badge {
+      position: absolute;
+      top: 0.85rem;
+      right: 1rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: var(--green-soft);
+      color: var(--green);
+      border-radius: 99px;
+      padding: 0.2rem 0.55rem;
+      display: none;
+    }
+
+    .card-front.is-learned .learned-badge { display: block; }
+
+    .hanzi {
+      font-family: 'Kaiti SC', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif SC', serif;
+      font-size: clamp(4.5rem, 18vw, 6.5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--ink);
+    }
+
+    .hint {
+      margin-top: 1.25rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .pinyin {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+      letter-spacing: 0.04em;
+    }
+
+    .meaning {
+      font-size: 1.2rem;
+      color: var(--ink);
+      max-width: 18rem;
+      line-height: 1.4;
+    }
+
+    .rank-badge {
+      margin-top: 0.6rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+      padding: 0.3rem 0.65rem;
+      background: rgba(28, 25, 23, 0.05);
+      border-radius: 99px;
+    }
+
+    .btn-speak {
+      margin-top: 0.65rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.8rem;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .btn-speak:hover { background: #991b1b; }
+    .btn-speak:active { transform: scale(0.97); }
+
+    /* ── action row (slides in on flip) ── */
+    .reveal-wrap {
+      width: min(420px, 100%);
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.35s ease, opacity 0.25s ease, margin-bottom 0.35s ease;
+      margin-bottom: 0;
+    }
+
+    .reveal-wrap.visible {
+      max-height: 200px;
+      opacity: 1;
+      margin-bottom: 0.85rem;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 0.65rem;
+    }
+
+    .btn-learned {
+      flex: 1;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      background: var(--green);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(21, 128, 61, 0.3);
+      transition: background 0.15s, transform 0.15s;
+    }
+
+    .btn-learned:hover { background: #166534; }
+    .btn-learned:active { transform: scale(0.97); }
+
+    .btn-keep {
+      flex: 1;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border: 1.5px solid rgba(28, 25, 23, 0.14);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      background: #fff;
+      color: var(--ink);
+      transition: background 0.15s, transform 0.15s;
+    }
+
+    .btn-keep:hover { background: #fafaf9; }
+    .btn-keep:active { transform: scale(0.97); }
+
+    /* ── examples panel ── */
+    .examples-panel {
+      width: min(420px, 100%);
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.4s ease, opacity 0.3s ease, margin-bottom 0.4s ease;
+      margin-bottom: 0;
+    }
+
+    .examples-panel.visible {
+      max-height: 320px;
+      opacity: 1;
+      margin-bottom: 1.25rem;
+    }
+
+    .examples-inner {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid rgba(28, 25, 23, 0.07);
+      padding: 1rem 1.25rem;
+    }
+
+    .examples-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .example-row-grid {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.2rem 0.6rem;
+      margin-bottom: 0.7rem;
+      align-items: center;
+    }
+
+    .example-row-grid:last-child { margin-bottom: 0; }
+
+    .ex-hanzi {
+      font-family: 'Kaiti SC', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif SC', serif;
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    .example-text-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .ex-pinyin {
+      font-size: 1rem;
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .ex-meaning {
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .ex-speak-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.1rem 0.25rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      opacity: 0.5;
+      transition: opacity 0.15s;
+    }
+
+    .ex-speak-btn:hover { opacity: 1; }
+
+    /* ── completion screen ── */
+    .completion {
+      width: min(420px, 100%);
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(28, 25, 23, 0.06);
+      padding: 3rem 2rem;
+      text-align: center;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .completion.show { display: flex; }
+
+    .completion-icon { font-size: 3rem; line-height: 1; }
+    .completion h2 { font-size: 1.4rem; font-weight: 700; }
+    .completion p { font-size: 0.95rem; color: var(--muted); }
+
+    /* ── bottom bar ── */
+    .bottom-bar {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      margin-top: 0.25rem;
+    }
+
+    .btn-reset {
+      font-family: inherit;
+      font-size: 0.8rem;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      padding: 0.25rem;
+      transition: color 0.15s;
+    }
+
+    .btn-reset:hover { color: var(--ink); }
+
+    .btn-restart {
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(185, 28, 28, 0.35);
+      transition: background 0.15s, transform 0.15s;
+    }
+
+    .btn-restart:hover { background: #991b1b; }
+    .btn-restart:active { transform: scale(0.97); }
+
+    .shortcuts {
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    kbd {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      background: #fff;
+      border: 1px solid rgba(28, 25, 23, 0.15);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.7rem;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .card { transition: none; }
+      .progress-fill { transition: none; }
+      .examples-panel, .reveal-wrap { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Top 100 Chinese Words</h1>
+    <p class="subtitle">Flip to reveal, then mark words as learned to remove them from the deck.</p>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-meta">
+      <span id="learnedCount"><strong>0</strong> learned</span>
+      <span id="remainingCount">100 remaining</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <div class="scene" id="scene">
+    <div class="card" id="card" role="button" tabindex="0" aria-label="Flashcard. Click or press Space to flip.">
+      <div class="card-face card-front" id="cardFront">
+        <span class="card-label">Read this</span>
+        <span class="learned-badge">✓ Learned</span>
+        <span class="hanzi" id="hanzi"></span>
+        <p class="hint">Tap or press <kbd>Space</kbd> to reveal</p>
+      </div>
+      <div class="card-face card-back">
+        <span class="card-label">Answer</span>
+        <span class="hanzi" id="hanziBack" style="font-size: 2.75rem; margin-bottom: 0.25rem;"></span>
+        <p class="pinyin" id="pinyin"></p>
+        <p class="meaning" id="meaning"></p>
+        <span class="rank-badge" id="rankBadge"></span>
+        <button class="btn-speak" id="speakBtn" type="button">
+          <span>🔊</span> Listen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="reveal-wrap" id="revealWrap" aria-hidden="true">
+    <div class="action-row">
+      <button class="btn-learned" id="learnedBtn" type="button">✓ Got it — mark learned</button>
+      <button class="btn-keep" id="keepBtn" type="button">Still learning →</button>
+    </div>
+  </div>
+
+  <div class="examples-panel" id="examplesPanel" aria-hidden="true">
+    <div class="examples-inner">
+      <p class="examples-title">Example Phrases</p>
+      <div id="examplesList"></div>
+    </div>
+  </div>
+
+  <div class="completion" id="completion">
+    <div class="completion-icon">🎉</div>
+    <h2>All 100 words learned!</h2>
+    <p>Great work. Reset to start fresh or unmark words to keep drilling.</p>
+    <button class="btn-restart" id="restartBtn" type="button">Start over</button>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="btn-reset" id="resetBtn" type="button">Reset all progress</button>
+  </div>
+
+  <p class="shortcuts">
+    <kbd>Space</kbd> flip &nbsp;·&nbsp;
+    <kbd>→</kbd> or <kbd>Enter</kbd> still learning &nbsp;·&nbsp;
+    <kbd>L</kbd> mark learned
+  </p>
+
+  <script>
+    const deck = [
+      { hanzi: '的', pinyin: 'de', meaning: 'possessive / modifying particle', examples: [
+        { phrase: '我的书', pinyin: 'wǒ de shū', meaning: 'my book' },
+        { phrase: '漂亮的花', pinyin: 'piàoliang de huā', meaning: 'beautiful flower' },
+      ]},
+      { hanzi: '一', pinyin: 'yī', meaning: 'one', examples: [
+        { phrase: '一起', pinyin: 'yīqǐ', meaning: 'together' },
+        { phrase: '一个人', pinyin: 'yī gè rén', meaning: 'one person / alone' },
+      ]},
+      { hanzi: '是', pinyin: 'shì', meaning: 'to be; yes', examples: [
+        { phrase: '你是谁', pinyin: 'nǐ shì shéi', meaning: 'who are you?' },
+        { phrase: '这是我的', pinyin: 'zhè shì wǒ de', meaning: 'this is mine' },
+      ]},
+      { hanzi: '在', pinyin: 'zài', meaning: 'at; in; exist', examples: [
+        { phrase: '在家', pinyin: 'zài jiā', meaning: 'at home' },
+        { phrase: '他在哪里', pinyin: 'tā zài nǎlǐ', meaning: 'where is he?' },
+      ]},
+      { hanzi: '不', pinyin: 'bù', meaning: 'not; no', examples: [
+        { phrase: '不好意思', pinyin: 'bù hǎoyìsi', meaning: 'excuse me / sorry' },
+        { phrase: '不客气', pinyin: 'bù kèqi', meaning: "you're welcome" },
+      ]},
+      { hanzi: '了', pinyin: 'le', meaning: 'completed action particle', examples: [
+        { phrase: '吃了吗', pinyin: 'chī le ma', meaning: 'have you eaten?' },
+        { phrase: '好了', pinyin: 'hǎo le', meaning: 'done / okay' },
+      ]},
+      { hanzi: '有', pinyin: 'yǒu', meaning: 'to have; there is', examples: [
+        { phrase: '我有时间', pinyin: 'wǒ yǒu shíjiān', meaning: 'I have time' },
+        { phrase: '有没有', pinyin: 'yǒu méiyǒu', meaning: 'do you have (any)?' },
+      ]},
+      { hanzi: '和', pinyin: 'hé', meaning: 'and; with; peace', examples: [
+        { phrase: '你和我', pinyin: 'nǐ hé wǒ', meaning: 'you and I' },
+        { phrase: '和平', pinyin: 'hépíng', meaning: 'peace' },
+      ]},
+      { hanzi: '人', pinyin: 'rén', meaning: 'person; people', examples: [
+        { phrase: '中国人', pinyin: 'Zhōngguórén', meaning: 'Chinese person' },
+        { phrase: '好人', pinyin: 'hǎorén', meaning: 'good person' },
+      ]},
+      { hanzi: '这', pinyin: 'zhè', meaning: 'this', examples: [
+        { phrase: '这里', pinyin: 'zhèlǐ', meaning: 'here' },
+        { phrase: '这个', pinyin: 'zhège', meaning: 'this one' },
+      ]},
+      { hanzi: '中', pinyin: 'zhōng', meaning: 'middle; China', examples: [
+        { phrase: '中国', pinyin: 'Zhōngguó', meaning: 'China' },
+        { phrase: '中文', pinyin: 'Zhōngwén', meaning: 'Chinese language' },
+      ]},
+      { hanzi: '大', pinyin: 'dà', meaning: 'big; large', examples: [
+        { phrase: '大学', pinyin: 'dàxué', meaning: 'university' },
+        { phrase: '大家', pinyin: 'dàjiā', meaning: 'everyone' },
+      ]},
+      { hanzi: '为', pinyin: 'wèi / wéi', meaning: 'for; because of; act as', examples: [
+        { phrase: '为什么', pinyin: 'wèishéme', meaning: 'why?' },
+        { phrase: '因为', pinyin: 'yīnwèi', meaning: 'because' },
+      ]},
+      { hanzi: '上', pinyin: 'shàng', meaning: 'up; on; above', examples: [
+        { phrase: '上面', pinyin: 'shàngmiàn', meaning: 'above / on top' },
+        { phrase: '上班', pinyin: 'shàngbān', meaning: 'go to work' },
+      ]},
+      { hanzi: '个', pinyin: 'gè', meaning: 'general measure word', examples: [
+        { phrase: '一个', pinyin: 'yī gè', meaning: 'one (of something)' },
+        { phrase: '这个人', pinyin: 'zhège rén', meaning: 'this person' },
+      ]},
+      { hanzi: '国', pinyin: 'guó', meaning: 'country; nation', examples: [
+        { phrase: '国家', pinyin: 'guójiā', meaning: 'country / nation' },
+        { phrase: '外国', pinyin: 'wàiguó', meaning: 'foreign country' },
+      ]},
+      { hanzi: '我', pinyin: 'wǒ', meaning: 'I; me', examples: [
+        { phrase: '我是学生', pinyin: 'wǒ shì xuésheng', meaning: 'I am a student' },
+        { phrase: '我们', pinyin: 'wǒmen', meaning: 'we / us' },
+      ]},
+      { hanzi: '以', pinyin: 'yǐ', meaning: 'with; by; in order to', examples: [
+        { phrase: '可以', pinyin: 'kěyǐ', meaning: 'can / may' },
+        { phrase: '以后', pinyin: 'yǐhòu', meaning: 'after / later' },
+      ]},
+      { hanzi: '要', pinyin: 'yào', meaning: 'to want; need; will', examples: [
+        { phrase: '我要去', pinyin: 'wǒ yào qù', meaning: 'I want to go' },
+        { phrase: '需要', pinyin: 'xūyào', meaning: 'to need' },
+      ]},
+      { hanzi: '他', pinyin: 'tā', meaning: 'he; him', examples: [
+        { phrase: '他是谁', pinyin: 'tā shì shéi', meaning: 'who is he?' },
+        { phrase: '他们', pinyin: 'tāmen', meaning: 'they / them' },
+      ]},
+      { hanzi: '时', pinyin: 'shí', meaning: 'time; when', examples: [
+        { phrase: '时间', pinyin: 'shíjiān', meaning: 'time' },
+        { phrase: '有时候', pinyin: 'yǒu shíhou', meaning: 'sometimes' },
+      ]},
+      { hanzi: '来', pinyin: 'lái', meaning: 'to come', examples: [
+        { phrase: '来这里', pinyin: 'lái zhèlǐ', meaning: 'come here' },
+        { phrase: '进来', pinyin: 'jìnlái', meaning: 'come in' },
+      ]},
+      { hanzi: '用', pinyin: 'yòng', meaning: 'to use', examples: [
+        { phrase: '使用', pinyin: 'shǐyòng', meaning: 'to use' },
+        { phrase: '有用', pinyin: 'yǒuyòng', meaning: 'useful' },
+      ]},
+      { hanzi: '们', pinyin: 'men', meaning: 'plural marker (我们)', examples: [
+        { phrase: '我们', pinyin: 'wǒmen', meaning: 'we' },
+        { phrase: '你们', pinyin: 'nǐmen', meaning: 'you (plural)' },
+      ]},
+      { hanzi: '生', pinyin: 'shēng', meaning: 'life; birth; raw', examples: [
+        { phrase: '学生', pinyin: 'xuésheng', meaning: 'student' },
+        { phrase: '生日', pinyin: 'shēngrì', meaning: 'birthday' },
+      ]},
+      { hanzi: '到', pinyin: 'dào', meaning: 'to arrive; to', examples: [
+        { phrase: '到了', pinyin: 'dào le', meaning: 'arrived' },
+        { phrase: '做到', pinyin: 'zuòdào', meaning: 'to achieve' },
+      ]},
+      { hanzi: '作', pinyin: 'zuò', meaning: 'to do; make; work', examples: [
+        { phrase: '工作', pinyin: 'gōngzuò', meaning: 'work / job' },
+        { phrase: '作业', pinyin: 'zuòyè', meaning: 'homework' },
+      ]},
+      { hanzi: '地', pinyin: 'de / dì', meaning: 'adverb particle; earth', examples: [
+        { phrase: '慢慢地', pinyin: 'mànmàn de', meaning: 'slowly' },
+        { phrase: '地方', pinyin: 'dìfāng', meaning: 'place' },
+      ]},
+      { hanzi: '于', pinyin: 'yú', meaning: 'in; at; to', examples: [
+        { phrase: '关于', pinyin: 'guānyú', meaning: 'about / regarding' },
+        { phrase: '于是', pinyin: 'yúshì', meaning: 'therefore' },
+      ]},
+      { hanzi: '出', pinyin: 'chū', meaning: 'to go out; exit', examples: [
+        { phrase: '出去', pinyin: 'chūqù', meaning: 'go out' },
+        { phrase: '出来', pinyin: 'chūlái', meaning: 'come out' },
+      ]},
+      { hanzi: '就', pinyin: 'jiù', meaning: 'then; right away; just', examples: [
+        { phrase: '就是', pinyin: 'jiùshì', meaning: 'exactly / it is' },
+        { phrase: '马上就来', pinyin: 'mǎshàng jiù lái', meaning: 'coming right away' },
+      ]},
+      { hanzi: '分', pinyin: 'fēn / fèn', meaning: 'to divide; minute; part', examples: [
+        { phrase: '五分钟', pinyin: 'wǔ fēnzhōng', meaning: 'five minutes' },
+        { phrase: '十分', pinyin: 'shífēn', meaning: 'very / fully' },
+      ]},
+      { hanzi: '对', pinyin: 'duì', meaning: 'correct; toward; pair', examples: [
+        { phrase: '对不起', pinyin: 'duìbuqǐ', meaning: 'sorry' },
+        { phrase: '对了', pinyin: 'duì le', meaning: "that's right" },
+      ]},
+      { hanzi: '成', pinyin: 'chéng', meaning: 'to become; succeed', examples: [
+        { phrase: '完成', pinyin: 'wánchéng', meaning: 'to complete' },
+        { phrase: '成功', pinyin: 'chénggōng', meaning: 'success' },
+      ]},
+      { hanzi: '会', pinyin: 'huì', meaning: 'can; meeting; will', examples: [
+        { phrase: '我会说中文', pinyin: 'wǒ huì shuō Zhōngwén', meaning: 'I can speak Chinese' },
+        { phrase: '开会', pinyin: 'kāihuì', meaning: 'hold a meeting' },
+      ]},
+      { hanzi: '可', pinyin: 'kě', meaning: 'can; may; approve', examples: [
+        { phrase: '可以', pinyin: 'kěyǐ', meaning: 'can / may' },
+        { phrase: '可能', pinyin: 'kěnéng', meaning: 'maybe / possible' },
+      ]},
+      { hanzi: '主', pinyin: 'zhǔ', meaning: 'main; host; owner', examples: [
+        { phrase: '主人', pinyin: 'zhǔrén', meaning: 'host / owner' },
+        { phrase: '主要', pinyin: 'zhǔyào', meaning: 'main / primary' },
+      ]},
+      { hanzi: '发', pinyin: 'fā / fà', meaning: 'to send; develop; hair', examples: [
+        { phrase: '发现', pinyin: 'fāxiàn', meaning: 'to discover' },
+        { phrase: '发展', pinyin: 'fāzhǎn', meaning: 'to develop' },
+      ]},
+      { hanzi: '年', pinyin: 'nián', meaning: 'year', examples: [
+        { phrase: '今年', pinyin: 'jīnnián', meaning: 'this year' },
+        { phrase: '新年', pinyin: 'xīnnián', meaning: 'New Year' },
+      ]},
+      { hanzi: '动', pinyin: 'dòng', meaning: 'to move; action', examples: [
+        { phrase: '动物', pinyin: 'dòngwù', meaning: 'animal' },
+        { phrase: '运动', pinyin: 'yùndòng', meaning: 'exercise / sport' },
+      ]},
+      { hanzi: '同', pinyin: 'tóng', meaning: 'same; together', examples: [
+        { phrase: '同学', pinyin: 'tóngxué', meaning: 'classmate' },
+        { phrase: '不同', pinyin: 'bùtóng', meaning: 'different' },
+      ]},
+      { hanzi: '工', pinyin: 'gōng', meaning: 'work; labor; craft', examples: [
+        { phrase: '工作', pinyin: 'gōngzuò', meaning: 'work / job' },
+        { phrase: '工人', pinyin: 'gōngrén', meaning: 'worker' },
+      ]},
+      { hanzi: '也', pinyin: 'yě', meaning: 'also; too', examples: [
+        { phrase: '我也是', pinyin: 'wǒ yě shì', meaning: 'me too' },
+        { phrase: '也许', pinyin: 'yěxǔ', meaning: 'perhaps' },
+      ]},
+      { hanzi: '能', pinyin: 'néng', meaning: 'can; able; energy', examples: [
+        { phrase: '可能', pinyin: 'kěnéng', meaning: 'possible' },
+        { phrase: '能力', pinyin: 'nénglì', meaning: 'ability' },
+      ]},
+      { hanzi: '下', pinyin: 'xià', meaning: 'down; below; next', examples: [
+        { phrase: '下午', pinyin: 'xiàwǔ', meaning: 'afternoon' },
+        { phrase: '下面', pinyin: 'xiàmiàn', meaning: 'below / underneath' },
+      ]},
+      { hanzi: '过', pinyin: 'guò', meaning: 'to pass; cross; -ed', examples: [
+        { phrase: '过来', pinyin: 'guòlái', meaning: 'come over' },
+        { phrase: '过去', pinyin: 'guòqù', meaning: 'the past / go over' },
+      ]},
+      { hanzi: '子', pinyin: 'zi / zǐ', meaning: 'child; noun suffix; son', examples: [
+        { phrase: '孩子', pinyin: 'háizi', meaning: 'child' },
+        { phrase: '桌子', pinyin: 'zhuōzi', meaning: 'table' },
+      ]},
+      { hanzi: '说', pinyin: 'shuō', meaning: 'to speak; say', examples: [
+        { phrase: '说话', pinyin: 'shuōhuà', meaning: 'to talk' },
+        { phrase: '听说', pinyin: 'tīngshuō', meaning: 'heard that / apparently' },
+      ]},
+      { hanzi: '你', pinyin: 'nǐ', meaning: 'you', examples: [
+        { phrase: '你好', pinyin: 'nǐ hǎo', meaning: 'hello' },
+        { phrase: '谢谢你', pinyin: 'xièxie nǐ', meaning: 'thank you' },
+      ]},
+      { hanzi: '种', pinyin: 'zhǒng / zhòng', meaning: 'kind; to plant', examples: [
+        { phrase: '各种', pinyin: 'gèzhǒng', meaning: 'various kinds' },
+        { phrase: '种类', pinyin: 'zhǒnglèi', meaning: 'type / category' },
+      ]},
+      { hanzi: '面', pinyin: 'miàn', meaning: 'face; surface; noodles', examples: [
+        { phrase: '面条', pinyin: 'miàntiáo', meaning: 'noodles' },
+        { phrase: '前面', pinyin: 'qiánmiàn', meaning: 'in front' },
+      ]},
+      { hanzi: '而', pinyin: 'ér', meaning: 'and; but; yet', examples: [
+        { phrase: '而且', pinyin: 'érqiě', meaning: 'moreover / and also' },
+        { phrase: '然而', pinyin: "rán'ér", meaning: 'however' },
+      ]},
+      { hanzi: '方', pinyin: 'fāng', meaning: 'square; direction; method', examples: [
+        { phrase: '地方', pinyin: 'dìfāng', meaning: 'place' },
+        { phrase: '方法', pinyin: 'fāngfǎ', meaning: 'method' },
+      ]},
+      { hanzi: '后', pinyin: 'hòu', meaning: 'behind; after; back', examples: [
+        { phrase: '以后', pinyin: 'yǐhòu', meaning: 'after / later' },
+        { phrase: '后面', pinyin: 'hòumiàn', meaning: 'behind / in back' },
+      ]},
+      { hanzi: '多', pinyin: 'duō', meaning: 'many; much', examples: [
+        { phrase: '多少', pinyin: 'duōshao', meaning: 'how much / many?' },
+        { phrase: '很多', pinyin: 'hěnduō', meaning: 'a lot' },
+      ]},
+      { hanzi: '定', pinyin: 'dìng', meaning: 'to fix; decide; sure', examples: [
+        { phrase: '一定', pinyin: 'yīdìng', meaning: 'certainly / definitely' },
+        { phrase: '决定', pinyin: 'juédìng', meaning: 'to decide' },
+      ]},
+      { hanzi: '行', pinyin: 'xíng / háng', meaning: 'OK; walk; profession', examples: [
+        { phrase: '行不行', pinyin: 'xíng bu xíng', meaning: 'is it okay?' },
+        { phrase: '银行', pinyin: 'yínháng', meaning: 'bank' },
+      ]},
+      { hanzi: '学', pinyin: 'xué', meaning: 'to study; learning', examples: [
+        { phrase: '学习', pinyin: 'xuéxí', meaning: 'to study / learn' },
+        { phrase: '大学', pinyin: 'dàxué', meaning: 'university' },
+      ]},
+      { hanzi: '法', pinyin: 'fǎ', meaning: 'law; method; way', examples: [
+        { phrase: '方法', pinyin: 'fāngfǎ', meaning: 'method' },
+        { phrase: '法律', pinyin: 'fǎlǜ', meaning: 'law' },
+      ]},
+      { hanzi: '所', pinyin: 'suǒ', meaning: 'place; that which', examples: [
+        { phrase: '所以', pinyin: 'suǒyǐ', meaning: 'therefore / so' },
+        { phrase: '所有', pinyin: 'suǒyǒu', meaning: 'all / everything' },
+      ]},
+      { hanzi: '民', pinyin: 'mín', meaning: 'the people; citizen', examples: [
+        { phrase: '人民', pinyin: 'rénmín', meaning: 'the people' },
+        { phrase: '民族', pinyin: 'mínzú', meaning: 'ethnic group / nation' },
+      ]},
+      { hanzi: '得', pinyin: 'de / dé / děi', meaning: 'particle; obtain; must', examples: [
+        { phrase: '觉得', pinyin: 'juéde', meaning: 'to feel / think' },
+        { phrase: '得到', pinyin: 'dédào', meaning: 'to obtain' },
+      ]},
+      { hanzi: '经', pinyin: 'jīng', meaning: 'classic; pass through; manage', examples: [
+        { phrase: '经常', pinyin: 'jīngcháng', meaning: 'often' },
+        { phrase: '经济', pinyin: 'jīngjì', meaning: 'economy' },
+      ]},
+      { hanzi: '十', pinyin: 'shí', meaning: 'ten', examples: [
+        { phrase: '十分', pinyin: 'shífēn', meaning: 'very / completely' },
+        { phrase: '十月', pinyin: 'shíyuè', meaning: 'October' },
+      ]},
+      { hanzi: '三', pinyin: 'sān', meaning: 'three', examples: [
+        { phrase: '三月', pinyin: 'sānyuè', meaning: 'March' },
+        { phrase: '三角', pinyin: 'sānjiǎo', meaning: 'triangle' },
+      ]},
+      { hanzi: '之', pinyin: 'zhī', meaning: 'of; it; classical marker', examples: [
+        { phrase: '总之', pinyin: 'zǒngzhī', meaning: 'in short' },
+        { phrase: '之后', pinyin: 'zhīhòu', meaning: 'afterwards' },
+      ]},
+      { hanzi: '进', pinyin: 'jìn', meaning: 'to enter; advance', examples: [
+        { phrase: '进来', pinyin: 'jìnlái', meaning: 'come in' },
+        { phrase: '进步', pinyin: 'jìnbù', meaning: 'progress' },
+      ]},
+      { hanzi: '着', pinyin: 'zhe / zháo / zhuó', meaning: 'ongoing action particle', examples: [
+        { phrase: '看着', pinyin: 'kàn zhe', meaning: 'looking at' },
+        { phrase: '等着', pinyin: 'děng zhe', meaning: 'waiting' },
+      ]},
+      { hanzi: '等', pinyin: 'děng', meaning: 'to wait; etc.; rank', examples: [
+        { phrase: '等一下', pinyin: 'děng yīxià', meaning: 'wait a moment' },
+        { phrase: '等等', pinyin: 'děngdeng', meaning: 'wait / hold on' },
+      ]},
+      { hanzi: '没', pinyin: 'méi / mò', meaning: 'not have; drowned', examples: [
+        { phrase: '没有', pinyin: 'méiyǒu', meaning: "don't have / no" },
+        { phrase: '没关系', pinyin: 'méiguānxi', meaning: "it's okay / never mind" },
+      ]},
+      { hanzi: '好', pinyin: 'hǎo / hào', meaning: 'good; like', examples: [
+        { phrase: '你好', pinyin: 'nǐ hǎo', meaning: 'hello' },
+        { phrase: '好吃', pinyin: 'hǎochī', meaning: 'delicious' },
+      ]},
+      { hanzi: '家', pinyin: 'jiā', meaning: 'home; family', examples: [
+        { phrase: '回家', pinyin: 'huíjiā', meaning: 'go home' },
+        { phrase: '家人', pinyin: 'jiārén', meaning: 'family members' },
+      ]},
+      { hanzi: '电', pinyin: 'diàn', meaning: 'electricity; electric', examples: [
+        { phrase: '电话', pinyin: 'diànhuà', meaning: 'telephone' },
+        { phrase: '电脑', pinyin: 'diànnǎo', meaning: 'computer' },
+      ]},
+      { hanzi: '力', pinyin: 'lì', meaning: 'power; strength', examples: [
+        { phrase: '努力', pinyin: 'nǔlì', meaning: 'to work hard' },
+        { phrase: '力量', pinyin: 'lìliàng', meaning: 'strength / power' },
+      ]},
+      { hanzi: '里', pinyin: 'lǐ', meaning: 'inside; village; li (unit)', examples: [
+        { phrase: '里面', pinyin: 'lǐmiàn', meaning: 'inside' },
+        { phrase: '这里', pinyin: 'zhèlǐ', meaning: 'here' },
+      ]},
+      { hanzi: '如', pinyin: 'rú', meaning: 'like; as if; such as', examples: [
+        { phrase: '如果', pinyin: 'rúguǒ', meaning: 'if' },
+        { phrase: '如何', pinyin: 'rúhé', meaning: 'how / in what way' },
+      ]},
+      { hanzi: '水', pinyin: 'shuǐ', meaning: 'water', examples: [
+        { phrase: '水果', pinyin: 'shuǐguǒ', meaning: 'fruit' },
+        { phrase: '喝水', pinyin: 'hē shuǐ', meaning: 'drink water' },
+      ]},
+      { hanzi: '化', pinyin: 'huà', meaning: 'to transform; -ize', examples: [
+        { phrase: '变化', pinyin: 'biànhuà', meaning: 'change' },
+        { phrase: '文化', pinyin: 'wénhuà', meaning: 'culture' },
+      ]},
+      { hanzi: '高', pinyin: 'gāo', meaning: 'tall; high', examples: [
+        { phrase: '高中', pinyin: 'gāozhōng', meaning: 'high school' },
+        { phrase: '高兴', pinyin: 'gāoxìng', meaning: 'happy' },
+      ]},
+      { hanzi: '自', pinyin: 'zì', meaning: 'self; from', examples: [
+        { phrase: '自己', pinyin: 'zìjǐ', meaning: 'oneself' },
+        { phrase: '自然', pinyin: 'zìrán', meaning: 'nature / natural' },
+      ]},
+      { hanzi: '二', pinyin: 'èr', meaning: 'two', examples: [
+        { phrase: '二月', pinyin: 'èryuè', meaning: 'February' },
+        { phrase: '第二', pinyin: "dì'èr", meaning: 'second' },
+      ]},
+      { hanzi: '理', pinyin: 'lǐ', meaning: 'reason; manage; texture', examples: [
+        { phrase: '道理', pinyin: 'dàolǐ', meaning: 'reason / logic' },
+        { phrase: '理解', pinyin: 'lǐjiě', meaning: 'to understand' },
+      ]},
+      { hanzi: '起', pinyin: 'qǐ', meaning: 'to rise; start', examples: [
+        { phrase: '起来', pinyin: 'qǐlái', meaning: 'get up / rise' },
+        { phrase: '一起', pinyin: 'yīqǐ', meaning: 'together' },
+      ]},
+      { hanzi: '小', pinyin: 'xiǎo', meaning: 'small; little', examples: [
+        { phrase: '小心', pinyin: 'xiǎoxīn', meaning: 'be careful' },
+        { phrase: '小时', pinyin: 'xiǎoshí', meaning: 'hour' },
+      ]},
+      { hanzi: '物', pinyin: 'wù', meaning: 'thing; object', examples: [
+        { phrase: '动物', pinyin: 'dòngwù', meaning: 'animal' },
+        { phrase: '食物', pinyin: 'shíwù', meaning: 'food' },
+      ]},
+      { hanzi: '现', pinyin: 'xiàn', meaning: 'now; appear; cash', examples: [
+        { phrase: '现在', pinyin: 'xiànzài', meaning: 'now' },
+        { phrase: '发现', pinyin: 'fāxiàn', meaning: 'to discover' },
+      ]},
+      { hanzi: '实', pinyin: 'shí', meaning: 'real; solid; fruit', examples: [
+        { phrase: '其实', pinyin: 'qíshí', meaning: 'actually' },
+        { phrase: '实在', pinyin: 'shízài', meaning: 'really / indeed' },
+      ]},
+      { hanzi: '加', pinyin: 'jiā', meaning: 'to add; plus', examples: [
+        { phrase: '加油', pinyin: 'jiāyóu', meaning: 'cheer up / go!' },
+        { phrase: '增加', pinyin: 'zēngjiā', meaning: 'to increase' },
+      ]},
+      { hanzi: '量', pinyin: 'liàng', meaning: 'quantity; measure', examples: [
+        { phrase: '质量', pinyin: 'zhìliàng', meaning: 'quality' },
+        { phrase: '数量', pinyin: 'shùliàng', meaning: 'quantity / amount' },
+      ]},
+      { hanzi: '都', pinyin: 'dōu / dū', meaning: 'all; capital city', examples: [
+        { phrase: '都是', pinyin: 'dōu shì', meaning: 'are all' },
+        { phrase: '首都', pinyin: 'shǒudū', meaning: 'capital city' },
+      ]},
+      { hanzi: '两', pinyin: 'liǎng / liàng', meaning: 'two; both; tael', examples: [
+        { phrase: '两个', pinyin: 'liǎng gè', meaning: 'two (of something)' },
+        { phrase: '两次', pinyin: 'liǎng cì', meaning: 'twice' },
+      ]},
+      { hanzi: '机', pinyin: 'jī', meaning: 'machine; opportunity', examples: [
+        { phrase: '手机', pinyin: 'shǒujī', meaning: 'mobile phone' },
+        { phrase: '飞机', pinyin: 'fēijī', meaning: 'airplane' },
+      ]},
+      { hanzi: '当', pinyin: 'dāng / dàng', meaning: 'when; ought; pawn', examples: [
+        { phrase: '当然', pinyin: 'dāngrán', meaning: 'of course' },
+        { phrase: '当时', pinyin: 'dāngshí', meaning: 'at that time' },
+      ]},
+      { hanzi: '使', pinyin: 'shǐ', meaning: 'to make; use; envoy', examples: [
+        { phrase: '使用', pinyin: 'shǐyòng', meaning: 'to use' },
+        { phrase: '大使', pinyin: 'dàshǐ', meaning: 'ambassador' },
+      ]},
+      { hanzi: '点', pinyin: 'diǎn', meaning: "point; o'clock; a little", examples: [
+        { phrase: '一点', pinyin: 'yīdiǎn', meaning: 'a little' },
+        { phrase: '三点', pinyin: 'sān diǎn', meaning: "three o'clock" },
+      ]},
+      { hanzi: '去', pinyin: 'qù', meaning: 'to go', examples: [
+        { phrase: '去哪里', pinyin: 'qù nǎlǐ', meaning: 'where are you going?' },
+        { phrase: '出去', pinyin: 'chūqù', meaning: 'go out' },
+      ]},
+      { hanzi: '本', pinyin: 'běn', meaning: 'root; origin; book', examples: [
+        { phrase: '本来', pinyin: 'běnlái', meaning: 'originally' },
+        { phrase: '日本', pinyin: 'Rìběn', meaning: 'Japan' },
+      ]},
+      { hanzi: '看', pinyin: 'kàn', meaning: 'to look; watch', examples: [
+        { phrase: '看书', pinyin: 'kàn shū', meaning: 'read a book' },
+        { phrase: '看看', pinyin: 'kànkan', meaning: 'take a look' },
+      ]},
+      { hanzi: '天', pinyin: 'tiān', meaning: 'sky; day; heaven', examples: [
+        { phrase: '今天', pinyin: 'jīntiān', meaning: 'today' },
+        { phrase: '天气', pinyin: 'tiānqì', meaning: 'weather' },
+      ]},
+      { hanzi: '心', pinyin: 'xīn', meaning: 'heart; mind', examples: [
+        { phrase: '小心', pinyin: 'xiǎoxīn', meaning: 'be careful' },
+        { phrase: '开心', pinyin: 'kāixīn', meaning: 'happy' },
+      ]},
+    ];
+
+    const LEARNED_KEY = 'chinese-learned-v2';
+
+    // ── state ──
+    let learned = new Set(JSON.parse(localStorage.getItem(LEARNED_KEY) || '[]'));
+    let currentIdx = null; // index into deck
+    let isFlipped = false;
+
+    // ── dom ──
+    const card        = document.getElementById('card');
+    const cardFront   = document.getElementById('cardFront');
+    const hanziEl     = document.getElementById('hanzi');
+    const hanziBack   = document.getElementById('hanziBack');
+    const pinyinEl    = document.getElementById('pinyin');
+    const meaningEl   = document.getElementById('meaning');
+    const rankBadge   = document.getElementById('rankBadge');
+    const speakBtn    = document.getElementById('speakBtn');
+    const revealWrap  = document.getElementById('revealWrap');
+    const exPanel     = document.getElementById('examplesPanel');
+    const exList      = document.getElementById('examplesList');
+    const completion  = document.getElementById('completion');
+    const scene       = document.getElementById('scene');
+    const learnedCount    = document.getElementById('learnedCount');
+    const remainingCount  = document.getElementById('remainingCount');
+    const progressFill    = document.getElementById('progressFill');
+
+    // ── helpers ──
+    function saveState() {
+      localStorage.setItem(LEARNED_KEY, JSON.stringify([...learned]));
+    }
+
+    function pool() {
+      return deck.map((_, i) => i).filter(i => !learned.has(i));
+    }
+
+    function pickNext() {
+      const p = pool();
+      if (p.length === 0) return null;
+      // avoid repeating the same card if possible
+      const choices = p.length > 1 ? p.filter(i => i !== currentIdx) : p;
+      return choices[Math.floor(Math.random() * choices.length)];
+    }
+
+    function speak(text) {
+      if (!window.speechSynthesis) return;
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'zh-CN';
+      u.rate = 0.9;
+      speechSynthesis.speak(u);
+    }
+
+    function updateProgress() {
+      const n = learned.size;
+      const rem = 100 - n;
+      learnedCount.innerHTML = `<strong>${n}</strong> learned`;
+      remainingCount.textContent = `${rem} remaining`;
+      progressFill.style.width = `${n}%`;
+    }
+
+    function renderExamples(word) {
+      exList.innerHTML = '';
+      word.examples.forEach((ex, i) => {
+        const row = document.createElement('div');
+        row.className = 'example-row-grid';
+        row.innerHTML = `
+          <span class="ex-hanzi">${ex.phrase}</span>
+          <span class="example-text-col">
+            <span class="ex-pinyin">${ex.pinyin}</span>
+            <span class="ex-meaning">${ex.meaning}</span>
+          </span>
+          <button class="ex-speak-btn" data-i="${i}" title="Play">🔊</button>
+        `;
+        exList.appendChild(row);
+      });
+      exList.querySelectorAll('.ex-speak-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          speak(word.examples[+btn.dataset.i].phrase);
+        });
+      });
+    }
+
+    function showCard(idx) {
+      currentIdx = idx;
+      isFlipped = false;
+      const w = deck[idx];
+      hanziEl.textContent = w.hanzi;
+      hanziBack.textContent = w.hanzi;
+      pinyinEl.textContent = w.pinyin;
+      meaningEl.textContent = w.meaning;
+      rankBadge.textContent = `#${idx + 1} of 100`;
+      cardFront.classList.toggle('is-learned', learned.has(idx));
+      renderExamples(w);
+
+      card.classList.remove('flipped');
+      revealWrap.classList.remove('visible');
+      revealWrap.setAttribute('aria-hidden', 'true');
+      exPanel.classList.remove('visible');
+      exPanel.setAttribute('aria-hidden', 'true');
+
+      scene.style.display = '';
+      completion.classList.remove('show');
+      updateProgress();
+    }
+
+    function flipCard() {
+      if (isFlipped) return; // already revealed — do nothing on second tap
+      isFlipped = true;
+      card.classList.add('flipped');
+      revealWrap.classList.add('visible');
+      revealWrap.setAttribute('aria-hidden', 'false');
+      exPanel.classList.add('visible');
+      exPanel.setAttribute('aria-hidden', 'false');
+      setTimeout(() => speak(deck[currentIdx].hanzi), 300);
+    }
+
+    function advance() {
+      const next = pickNext();
+      if (next === null) {
+        showCompletion();
+      } else {
+        showCard(next);
+      }
+    }
+
+    function markLearned() {
+      if (currentIdx === null) return;
+      learned.add(currentIdx);
+      saveState();
+      advance();
+    }
+
+    function keepPracticing() {
+      advance();
+    }
+
+    function showCompletion() {
+      scene.style.display = 'none';
+      revealWrap.classList.remove('visible');
+      exPanel.classList.remove('visible');
+      completion.classList.add('show');
+      updateProgress();
+    }
+
+    function resetAll() {
+      if (!confirm('Reset all progress? All learned words will be unmarked.')) return;
+      learned.clear();
+      saveState();
+      const next = pickNext();
+      showCard(next);
+    }
+
+    // ── events ──
+    card.addEventListener('click', flipCard);
+    card.addEventListener('keydown', e => {
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+    });
+
+    speakBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      speak(deck[currentIdx].hanzi);
+    });
+
+    document.getElementById('learnedBtn').addEventListener('click', markLearned);
+    document.getElementById('keepBtn').addEventListener('click', keepPracticing);
+    document.getElementById('resetBtn').addEventListener('click', resetAll);
+    document.getElementById('restartBtn').addEventListener('click', resetAll);
+
+    document.addEventListener('keydown', e => {
+      if (e.target.matches('input,textarea,button')) return;
+      if (e.key === ' ') { e.preventDefault(); flipCard(); }
+      else if ((e.key === 'ArrowRight' || e.key === 'Enter') && isFlipped) keepPracticing();
+      else if (e.key === 'l' || e.key === 'L') { if (isFlipped) markLearned(); }
+    });
+
+    // ── init ──
+    const first = pickNext();
+    if (first === null) {
+      updateProgress();
+      showCompletion();
+    } else {
+      showCard(first);
+    }
+  </script>
+</body>
+</html>
