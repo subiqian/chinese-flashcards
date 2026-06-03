@@ -427,10 +427,72 @@
       font-size: 0.7rem;
     }
 
+    /* ── hint ── */
+    .hint-wrap {
+      width: min(420px, 100%);
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.35s ease, opacity 0.25s ease, margin-bottom 0.35s ease;
+      margin-bottom: 0;
+    }
+
+    .hint-wrap.visible {
+      max-height: 200px;
+      opacity: 1;
+      margin-bottom: 0.85rem;
+    }
+
+    .hint-inner {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid rgba(28, 25, 23, 0.07);
+      padding: 0.85rem 1.25rem;
+    }
+
+    .hint-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+    }
+
+    .hint-phrases {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .hint-phrase {
+      font-family: 'Kaiti SC', 'Kaiti TC', 'STKaiti', 'KaiTi', 'Noto Serif SC', serif;
+      font-size: 1.4rem;
+      color: var(--ink);
+      opacity: 0.75;
+    }
+
+    .btn-hint {
+      font-family: inherit;
+      font-size: 0.8rem;
+      color: var(--muted);
+      background: none;
+      border: 1px solid rgba(28, 25, 23, 0.15);
+      border-radius: 8px;
+      padding: 0.35rem 0.75rem;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+      width: min(420px, 100%);
+      margin-bottom: 0.85rem;
+    }
+
+    .btn-hint:hover { background: #fff; color: var(--ink); border-color: rgba(28,25,23,0.3); }
+    .btn-hint.hint-shown { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
     @media (prefers-reduced-motion: reduce) {
       .card { transition: none; }
       .progress-fill { transition: none; }
-      .examples-panel, .reveal-wrap { transition: none; }
+      .examples-panel, .reveal-wrap, .hint-wrap { transition: none; }
     }
   </style>
 </head>
@@ -471,6 +533,15 @@
     </div>
   </div>
 
+  <button class="btn-hint" id="hintBtn" type="button">💡 Show hint</button>
+
+  <div class="hint-wrap" id="hintWrap" aria-hidden="true">
+    <div class="hint-inner">
+      <p class="hint-label">Hint — phrases only</p>
+      <div class="hint-phrases" id="hintPhrases"></div>
+    </div>
+  </div>
+
   <div class="reveal-wrap" id="revealWrap" aria-hidden="true">
     <div class="action-row">
       <button class="btn-learned" id="learnedBtn" type="button">✓ Got it — mark learned</button>
@@ -498,6 +569,7 @@
 
   <p class="shortcuts">
     <kbd>Space</kbd> flip &nbsp;·&nbsp;
+    <kbd>H</kbd> hint &nbsp;·&nbsp;
     <kbd>→</kbd> or <kbd>Enter</kbd> still learning &nbsp;·&nbsp;
     <kbd>L</kbd> mark learned
   </p>
@@ -925,6 +997,9 @@
     const revealWrap  = document.getElementById('revealWrap');
     const exPanel     = document.getElementById('examplesPanel');
     const exList      = document.getElementById('examplesList');
+    const hintWrap    = document.getElementById('hintWrap');
+    const hintPhrases = document.getElementById('hintPhrases');
+    const hintBtn     = document.getElementById('hintBtn');
     const completion  = document.getElementById('completion');
     const scene       = document.getElementById('scene');
     const learnedCount    = document.getElementById('learnedCount');
@@ -963,6 +1038,29 @@
       // the TTS engine has enough context to pick the primary pronunciation.
       const text = w.pinyin.includes('/') ? w.examples[0].phrase : w.hanzi;
       speak(text);
+    }
+
+    function showHint() {
+      const w = deck[currentIdx];
+      hintPhrases.innerHTML = w.examples.map(ex =>
+        `<span class="hint-phrase">${ex.phrase}</span>`
+      ).join('');
+      hintWrap.classList.add('visible');
+      hintWrap.setAttribute('aria-hidden', 'false');
+      hintBtn.textContent = '💡 Hide hint';
+      hintBtn.classList.add('hint-shown');
+    }
+
+    function hideHint() {
+      hintWrap.classList.remove('visible');
+      hintWrap.setAttribute('aria-hidden', 'true');
+      hintBtn.textContent = '💡 Show hint';
+      hintBtn.classList.remove('hint-shown');
+    }
+
+    function toggleHint() {
+      if (hintWrap.classList.contains('visible')) hideHint();
+      else showHint();
     }
 
     function updateProgress() {
@@ -1010,6 +1108,8 @@
       revealWrap.setAttribute('aria-hidden', 'true');
       exPanel.classList.remove('visible');
       exPanel.setAttribute('aria-hidden', 'true');
+      hideHint();
+      hintBtn.style.display = '';
 
       scene.style.display = '';
       completion.classList.remove('show');
@@ -1029,6 +1129,8 @@
     function flipCard() {
       if (isFlipped) return; // already revealed — do nothing on second tap
       isFlipped = true;
+      hideHint();
+      hintBtn.style.display = 'none';
       card.classList.add('flipped');
       revealWrap.classList.add('visible');
       revealWrap.setAttribute('aria-hidden', 'false');
@@ -1084,6 +1186,8 @@
       speakCurrent();
     });
 
+    hintBtn.addEventListener('click', toggleHint);
+
     document.getElementById('learnedBtn').addEventListener('click', markLearned);
     document.getElementById('keepBtn').addEventListener('click', keepPracticing);
     document.getElementById('resetBtn').addEventListener('click', resetAll);
@@ -1094,6 +1198,7 @@
       if (e.key === ' ') { e.preventDefault(); flipCard(); }
       else if ((e.key === 'ArrowRight' || e.key === 'Enter') && isFlipped) keepPracticing();
       else if (e.key === 'l' || e.key === 'L') { if (isFlipped) markLearned(); }
+      else if (e.key === 'h' || e.key === 'H') { if (!isFlipped) toggleHint(); }
     });
 
     // ── init ──
